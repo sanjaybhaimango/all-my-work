@@ -1,0 +1,602 @@
+import DataFromXcell from "./DataFromXcell";
+import React, { useEffect, useState } from "react";
+import { Container } from "react-bootstrap";
+import * as xlsx from "xlsx";
+
+export default function App() {
+  const [toggletable, settoggletable] = useState(true);
+  function toggletablefunc() {
+    settoggletable((p) => !p);
+    console.log(toggletable);
+  }
+
+  let months1half = [31, 28, 31, 30, 31, 30];
+
+  let months2half = [31, 31, 30, 31, 30, 31];
+
+  interface ExcelData {
+    name: string;
+    period1from: Date;
+    period1to: Date;
+    period2from: Date;
+    period2to: Date;
+    period3from: Date;
+    period3to: Date;
+  }
+
+
+  
+
+
+  //below is the code for fetchind data from the xcell sheet
+  const [excelData, setExcelData] = useState<ExcelData[]>([]);
+  const fetchExcel = async () => {
+    try {
+      // Fetch the file from the public folder
+      const response = await fetch("/data1.xlsx"); // Adjust the path based on the file location in `public`
+      const data = await response.arrayBuffer();
+
+      // Parse the Excel file
+      const workbook = xlsx.read(data, { type: "array" });
+      const sheet = workbook.Sheets[workbook.SheetNames[0]];
+      const jsonData: ExcelData[] = xlsx.utils.sheet_to_json(sheet);
+      // setExcelData(jsonData);
+
+      jsonData.map((items, index) => {
+        let todaytempdate = new Date();
+      
+        // Set period1 dates normally
+        let date1 = new Date(`${items.period1from}-${todaytempdate.getFullYear()}`);
+        let date2 = new Date(`${items.period1to}-${todaytempdate.getFullYear()}`);
+      
+        // Check if period2from is not empty before creating date objects for period2
+        let date3 = items.period2from ? new Date(`${items.period2from}-${todaytempdate.getFullYear()}`) : null;
+        let date4 = items.period2to ? new Date(`${items.period2to}-${todaytempdate.getFullYear()}`) : null;
+      
+        // Check if period3from is not empty before creating date objects for period3
+        let date5 = items.period3from ? new Date(`${items.period3from}-${todaytempdate.getFullYear()}`) : null;
+        let date6 = items.period3to ? new Date(`${items.period3to}-${todaytempdate.getFullYear()}`) : null;
+      
+        // Update the periods in the items object
+        items.period1from = date1;
+        items.period1to = date2;
+        items.period2from = date3;
+        items.period2to = date4;
+        items.period3from = date5;
+        items.period3to = date6;
+      });
+      
+      setExcelData(jsonData);
+    } catch (error) {
+      console.error("Error fetching or parsing Excel file:", error);
+    }
+  };
+
+
+
+  console.log("sanjay",excelData);
+// //////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+
+
+
+
+
+
+
+
+const obj = excelData.map((item, index) => {
+  // Start with the basic object structure
+  const leaves = [
+    {
+      start: item.period1from,
+      end: item.period1to,
+    },
+  ];
+
+  // Conditionally add the second period if it's not empty
+  if (item.period2from) {
+    leaves.push({
+      start: item.period2from,
+      end: item.period2to,
+    });
+  }
+
+  // Conditionally add the third period if it's not empty
+  if (item.period3from) {
+    leaves.push({
+      start: item.period3from,
+      end: item.period3to,
+    });
+  }
+
+  return {
+    name: item.name,
+    leaves: leaves,
+  };
+});
+
+console.log("object-2",obj)
+
+  useEffect(() => {
+    fetchExcel(); // Fetch the Excel file on component mount
+  }, []);
+
+  useEffect(() => {
+    console.log("karn", excelData);
+  }, [excelData]);
+
+
+
+
+  let obj1= [
+    {
+      name: "karan",
+      leaves: [
+        {
+          start: new Date(2025, 0, 5),
+          end: new Date(2025, 1, 20),
+        },
+        {
+          start: new Date(2025, 2, 9),
+          end: new Date(2025, 3, 16),
+        },
+
+        {
+          start: new Date(2025, 6, 9),
+          end: new Date(2025, 7, 16),
+        },
+      ],
+    },
+
+    {
+      name: "shanthanu",
+      leaves: [
+        {
+          start: new Date(2025, 9, 5),
+          end: new Date(2025, 10, 20),
+        },
+        {
+          start: new Date(2025, 4, 9),
+          end: new Date(2025, 4, 16),
+        },
+      ],
+    },
+
+    {
+      name: "karthi",
+      leaves: [
+        {
+          start: new Date(2025, 8, 5),
+          end: new Date(2025, 8, 20),
+        },
+        {
+          start: new Date(2025, 6, 9),
+          end: new Date(2025, 6, 16),
+        },
+      ],
+    },
+
+    {
+      name: "mani",
+      leaves: [
+        {
+          start: new Date(2025, 5, 15),
+          end: new Date(2025, 7, 20),
+        },
+        {
+          start: new Date(2025, 2, 9),
+          end: new Date(2025, 3, 16),
+        },
+      ],
+    },
+    {
+      name: "sanjay",
+      leaves: [
+        {
+          start: new Date(2025, 2, 10),
+          end: new Date(2025, 1, 20),
+        },
+        {
+          start: new Date(2025, 2, 8),
+          end: new Date(2025, 2, 16),
+        },
+      ],
+    },
+  ];
+
+  let [toggle, settoglle] = useState(false);
+
+  function helperfunc(leavesarry, month, date) {
+    let newdate = new Date(2025, month, date);
+
+    return leavesarry.some((i) => {
+      if (newdate >= i.start && newdate <= i.end) {
+        return true;
+      }
+    });
+  }
+
+  function func1(leavesarry, month, date) {
+    let newdate = new Date(2025, month, date);
+
+    leavesarry.some((i) => {
+      if (newdate >= i.start && newdate <= i.end) {
+        // alert(
+        //   "start=" +
+        //     i.start.toLocaleDateString("en-GB", {
+        //       year: "numeric",
+        //       month: "short",
+        //       day: "numeric",
+        //     }) +
+        //     " end date=" +
+        //     i.end.toLocaleDateString("en-GB", {
+        //       year: "numeric",
+        //       month: "short",
+        //       day: "numeric",
+        //     })
+        // );
+      }
+    });
+  }
+
+ 
+  return (
+    <div className="leaveplannercontainer">
+      <div className="container leaveplanner">
+        <div className="row leaveplannerheading">
+          <div className="col">leave planner</div>
+        </div>
+        <div className="row leaveplannertogglebtn">
+          <div className="col">
+            <button
+              onClick={() => settoggletable(true)}
+              style={
+                toggletable ? { background: "white" } : { background: "grey" }
+              }
+            >
+              table-1
+            </button>
+            <button
+              style={
+                !toggletable ? { background: "white" } : { background: "grey" }
+              }
+              onClick={() => settoggletable(false)}
+            >
+              table-2
+            </button>
+          </div>
+        </div>
+        <div className="row leaveplannertable">
+          <div className="col">
+            {toggletable ? (
+              // the below table for jan-june
+              <table className="table1sthalf">
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Jan</th>
+                    <th>Feb</th>
+                    <th>Mar</th>
+                    <th>Apr</th>
+                    <th>May</th>
+                    <th>Jun</th>
+                  </tr>
+                </thead>
+
+                <tbody>
+                  {obj.map((item, index) => {
+                    let leavespan = item.leaves.length;
+
+                    let i = 0;
+                    let startmonth = item.leaves[i].start.getMonth();
+                    let startdate = item.leaves[i].start.getDate();
+
+                    i < leavespan ? i++ : 0;
+
+                    return (
+                      <>
+                        <tr>
+                          <td>{item.name}</td>
+
+                          {months1half.map((month, monthindex) => {
+                            return (
+                              <>
+                                <td className="p-0">
+                                  <table className="secondtable">
+                                    <tbody>
+                                      <tr>
+                                        {Array.from(
+                                          { length: month },
+                                          (_, index2) => {
+                                            let date = index2 + 1;
+                                            const isHighlighted =
+                                              (monthindex === startmonth &&
+                                                date === startdate) ||
+                                              0;
+
+                                            let isleave = helperfunc(
+                                              item.leaves,
+                                              monthindex,
+                                              date
+                                            );
+
+                                            return (
+                                              <>
+                                                {isleave ? (
+                                                  <td
+                                                    style={{
+                                                      background: "red",
+                                                    }}
+                                                    onMouseOver={() =>
+                                                      func1(
+                                                        item.leaves,
+                                                        monthindex,
+                                                        date
+                                                      )
+                                                    }
+                                                  ></td>
+                                                ) : (
+                                                  <td> </td>
+                                                )}
+                                              </>
+                                            );
+                                          }
+                                        )}
+                                      </tr>
+                                    </tbody>
+                                  </table>
+                                </td>
+                              </>
+                            );
+                          })}
+                        </tr>
+                      </>
+                    );
+                  })}
+                </tbody>
+              </table>
+            ) : (
+              <table className="table2sthalf">
+                <thead>
+                  <tr>
+                    <th>Name</th>
+
+                    <th>Jul</th>
+                    <th>Aug</th>
+                    <th>Sep</th>
+                    <th>Oct</th>
+                    <th>Nov</th>
+                    <th>Dec</th>
+                  </tr>
+                </thead>
+
+                <tbody>
+                  {obj.map((item, index) => {
+                    let leavespan = item.leaves.length;
+
+                    let i = 0;
+                    let startmonth = item.leaves[i].start.getMonth();
+                    let startdate = item.leaves[i].start.getDate();
+
+                    i < leavespan ? i++ : 0;
+
+                    return (
+                      <>
+                        <tr>
+                          <td>{item.name}</td>
+
+                          {months2half.map((month, monthindex) => {
+                            return (
+                              <>
+                                <td className="p-0">
+                                  <table className="secondtable">
+                                    <tbody>
+                                      <tr>
+                                        {Array.from(
+                                          { length: month },
+                                          (_, index2) => {
+                                            let date = index2 + 1;
+                                            const isHighlighted =
+                                              (monthindex + 6 === startmonth &&
+                                                date === startdate) ||
+                                              0;
+
+                                            let isleave = helperfunc(
+                                              item.leaves,
+                                              monthindex + 6,
+                                              date
+                                            );
+
+                                            return (
+                                              <>
+                                                {isleave ? (
+                                                  <td
+                                                    style={{
+                                                      background: "red",
+                                                    }}
+                                                    onMouseOver={() =>
+                                                      func1(
+                                                        item.leaves,
+                                                        monthindex,
+                                                        date
+                                                      )
+                                                    }
+                                                  ></td>
+                                                ) : (
+                                                  <td> </td>
+                                                )}
+                                              </>
+                                            );
+                                          }
+                                        )}
+                                      </tr>
+                                    </tbody>
+                                  </table>
+                                </td>
+                              </>
+                            );
+                          })}
+                        </tr>
+                      </>
+                    );
+                  })}
+                </tbody>
+              </table>
+            )}
+          </div>
+        </div>
+      </div>
+
+     
+    </div>
+  );
+}
+
+
+
+
+/* table,tr{
+    border: 1px solid red;
+
+   
+    border-collapse: collapse;
+    text-align: center;
+
+
+   
+
+
+         
+
+}
+tr{
+    border: 1px solid rgb(0, 0, 0);
+    
+    height: 70px;
+}
+
+.maintable{
+    td{
+        padding: 2px;
+    }
+}
+
+
+.secondtable{
+
+    height: 30px;
+
+}
+
+
+
+button{
+    background: none;
+    border: none;
+   border-top: 1px solid red;
+   border-left: 1px solid red;
+   border-right: 1px solid red;
+   top: 1px;
+   position: relative;
+   background: white;
+
+    
+}
+
+
+.div1{
+    background: skyblue;
+}
+
+.div2{
+    background: seagreen;
+}
+
+
+.heading{as
+    font-size: 25px;
+    text-align: center;
+}  */
+
+
+
+
+
+    .leaveplannercontainer{
+      background: rgb(255, 208, 208);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+  
+  
+      .leaveplanner{
+          background: beige;
+          height: 80%;
+  
+          .leaveplannerheading{
+              text-align: center;
+              font-size: 30px;
+              text-transform: capitalize;
+              margin: 20px;
+              background: skyblue;
+          }
+  
+          .leaveplannertogglebtn{
+              background: cadetblue;
+              button{
+                  
+                  border: none;
+                  border-top: 1px solid black;
+                  border-left:1px solid black;
+                  border-right: 1px solid black;
+              }
+          }
+  
+  
+          .leaveplannertable{
+              .col{
+                  padding: 0;
+              }
+              .table1sthalf,.table2sthalf{
+                  border: 1px solid rgb(241, 245, 37);
+                  width:100%;
+                  height: 500px;
+                 
+                  
+  
+  
+                  thead{
+                      background: rgb(104, 104, 104);
+                      height: 60px;
+                      color: white;
+                      text-align: center;
+                      th{
+                          border: 1px solid black;
+                          font-size: 20px;
+                      }
+                  }
+  
+                  tbody{
+                      td{
+                          font-size: 20px;
+                          text-align: center;
+                          text-transform: capitalize;
+                          
+                        
+                         height: 70px;
+                         width: 40px;
+                         border: 1px solid black;
+                         td{
+                          border: none;
+                         }
+                      }
+                  }
+              }
+          }
+      }
+  
+  } 
