@@ -1,0 +1,138 @@
+1st make the layout of the projec 
+    MAKE DJNAGO PROJECT 
+    MAKE APP IN DJANGO 
+      INSIDE THAT MAKE A VITE PROJECT 
+
+
+
+  INSDIE VITE-PROJECT
+    MAKE A HTML FOLDER 
+      NEW.HTML
+          PASTE THIS --------------
+
+
+                                "<!DOCTYPE html>
+                              <html lang="en">
+                              <head>
+                                  <meta charset="UTF-8">
+                                  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                                  <title>Document</title>
+                                  <!-- if development -->
+                                  <script type="module">
+                                      import RefreshRuntime from 'http://localhost:5173/@react-refresh'
+                                      RefreshRuntime.injectIntoGlobalHook(window)
+                                      window.$RefreshReg$ = () => {}
+                                      window.$RefreshSig$ = () => (type) => type
+                                      window.__vite_plugin_react_preamble_installed__ = true
+                                    </script>
+                              <script type="module" src="http://localhost:5173/@vite/client"></script>
+                              <script type="module" src="http://localhost:5173/src/main.tsx"></script>
+                              
+                              </head>
+                              <body>
+                                  <div id="root"></div>
+                                  
+                              </body>
+                              </html>"
+
+
+
+
+
+
+
+
+                THEN MAKE VITE CONFI PASTE THIS AND RUN --npm run build
+                                        import { defineConfig } from 'vite';
+                                        import react from '@vitejs/plugin-react';
+                                        import { PreRenderedChunk } from 'rollup';
+                                        
+                                        // https://vite.dev/config/
+                                        export default defineConfig({
+                                          plugins: [react()],
+                                          build: {
+                                            // Generate .vite/manifest.json in outDir
+                                            manifest: true,
+                                            rollupOptions: {
+                                              output: {
+                                                // Customize asset file names
+                                                assetFileNames: (file: { name?: string }): string => {
+                                                  if (file.name?.endsWith('.css')) {
+                                                    return 'assets/css/[name].min.css';
+                                                  }
+                                                  return 'assets/[name].min.js'; // Default to .js for other files
+                                                },
+                                                // Customize entry file names
+                                                entryFileNames: (chunk: PreRenderedChunk): string => {
+                                                  if (chunk.name?.endsWith('.tsx')) {
+                                                    return 'assets/[name].min.tsx';
+                                                  }
+                                                  if (chunk.name?.endsWith('.ts')) {
+                                                    return 'assets/[name].min.ts';
+                                                  }
+                                                  return 'assets/[name].min.js'; // Default to .js for entry points
+                                                },
+                                              },
+                                            },
+                                          },
+                                        });
+
+
+
+    -============================================================================================================-============================================================================================================
+      NOW TO DJANGO APP 
+        MAKE A VIEWS FUNCITON FOR HOEM PAGE AND RENDER THE NEW.HTML PAGE IN THAT 
+
+                    from django.shortcuts import render
+    
+                      # Create your views here.
+                      def home(req):
+                          return render(req,'new.html')
+
+-============================================================================================================-============================================================================================================
+
+              
+            
+NOW TO THE PROJECT FOLDER 
+                              URLS ADD THE RENDER THE VIEWS FUCNTION HERE 
+                                          from django.contrib import admin
+                                          from django.urls import path
+                                          from app1.views import home
+                                          urlpatterns = [
+                                              path('admin/', admin.site.urls),
+                                              path('',home)
+                                          ]
+
+NOW TO THE PROJECT SETTINGS
+                              1. STATICFILES_DIRS = [
+                                 os.path.join(BASE_DIR,'app1','vite-project','public'),
+                                 os.path.join(BASE_DIR,'app1','vite-project','dist'),
+
+
+                            2. TEMAPLER DIR 
+                                  TEMPLATES = [
+                                                {
+                                                    'BACKEND': 'django.template.backends.django.DjangoTemplates',
+                                                    'DIRS': [os.path.join(BASE_DIR,'app1','vite-project','html')],
+                                                    'APP_DIRS': True,
+                                                    'OPTIONS': {
+                                                        'context_processors': [
+                                                            'django.template.context_processors.debug',
+                                                            'django.template.context_processors.request',
+                                                            'django.contrib.auth.context_processors.auth',
+                                                            'django.contrib.messages.context_processors.messages',
+                                                        ],
+                                                    },
+                                                },
+                                            ]
+                                            ]
+                                                                
+                                  3. INSTALLED APP ADD THIS 
+                                           'app1.apps.App1Config'
+
+
+                                4. IMPORT OS 
+                                          import os
+                                            
+
+          
